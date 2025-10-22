@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  oltp-db:
+    image: postgres:16
+    container_name: oltp-db
+    environment:
+      POSTGRES_DB: oltp
+      POSTGRES_USER: superu
+      POSTGRES_PASSWORD: password_oltp
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./volume/oltp:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  olap-db:
+    image: postgres:16
+    container_name: olap-db
+    environment:
+      POSTGRES_DB: olap
+      POSTGRES_USER: superu
+      POSTGRES_PASSWORD: password_olap
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./volume/olap:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  metabase-db:
+    image: postgres:16
+    container_name: metabase-db
+    environment:
+      POSTGRES_DB: metabase
+      POSTGRES_USER: superu
+      POSTGRES_PASSWORD: password_metabase
+    volumes:
+      - ./volume/metabase:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    ports:
+      - "3001:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: superu
+      MB_DB_PASS: password_metabase
+      MB_DB_HOST: metabase-db
+    depends_on:
+      - metabase-db
+    restart: unless-stopped
