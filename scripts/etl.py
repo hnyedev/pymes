@@ -4,25 +4,22 @@ import psycopg2.extras
 import os
 from datetime import datetime, timedelta
 
-# =============================================================================
-# CONFIGURACIÓN DE LA CONEXIÓN
-# =============================================================================
+
 # Lee las credenciales de las variables de entorno para mayor seguridad
+#definimos las credenciales para el acceso  a las bases de datos
 OLTP_DB_HOST = os.getenv("OLTP_DB_HOST", "localhost")
 OLTP_DB_PORT = os.getenv("OLTP_DB_PORT", "5432")
 OLTP_DB_NAME = os.getenv("OLTP_DB_NAME", "oltp_db")
 OLTP_DB_USER = os.getenv("OLTP_DB_USER", "user_oltp")
 OLTP_DB_PASSWORD = os.getenv("OLTP_DB_PASSWORD", "password_oltp")
-
+#credenciales de la base de datos análitica
 OLAP_DB_HOST = os.getenv("OLAP_DB_HOST", "localhost")
 OLAP_DB_PORT = os.getenv("OLAP_DB_PORT", "5433")
 OLAP_DB_NAME = os.getenv("OLAP_DB_NAME", "olap_db")
 OLAP_DB_USER = os.getenv("OLAP_DB_USER", "user_olap")
 OLAP_DB_PASSWORD = os.getenv("OLAP_DB_PASSWORD", "password_olap")
 
-# =============================================================================
-# FUNCIONES DE EXTRACCIÓN (EXTRACT)
-# =============================================================================
+
 
 def get_last_run_timestamp():
     """
@@ -71,9 +68,7 @@ def extract_new_transactions(conn_oltp, last_run_timestamp):
         """, (last_run_timestamp,))
         return cursor.fetchall()
 
-# =============================================================================
-# FUNCIONES DE CARGA (LOAD)
-# =============================================================================
+
 
 def load_data_into_olap(conn_olap, transactions):
     """
@@ -118,14 +113,13 @@ def refresh_materialized_views(conn_olap):
     Refresca las vistas materializadas en la base de datos OLAP.
     """
     with conn_olap.cursor() as cursor:
-        print("Refrescando vistas materializadas...")
+        
         cursor.execute("SELECT refrescar_vistas_materializadas();")
         conn_olap.commit()
-        print("Vistas materializadas actualizadas.")
+        
 
-# =============================================================================
-# ORQUESTADOR PRINCIPAL DEL ETL
-# =============================================================================
+
+
 
 def main():
     """
@@ -138,7 +132,6 @@ def main():
     
     try:
         # 1. Conectar a las bases de datos
-        print("Conectando a la base de datos OLTP...")
         conn_oltp = psycopg2.connect(
             host=OLTP_DB_HOST,
             port=OLTP_DB_PORT,
@@ -146,9 +139,8 @@ def main():
             user=OLTP_DB_USER,
             password=OLTP_DB_PASSWORD
         )
-        print("Conexión OLTP exitosa.")
+    
 
-        print("Conectando a la base de datos OLAP...")
         conn_olap = psycopg2.connect(
             host=OLAP_DB_HOST,
             port=OLAP_DB_PORT,
@@ -174,7 +166,7 @@ def main():
         load_data_into_olap(conn_olap, new_transactions)
         print("Carga de datos completada.")
 
-        # 4. Post-procesamiento en OLAP
+        # 4. Post procesamiento en OLAP
         refresh_materialized_views(conn_olap)
 
         # 5. Guardar timestamp de ejecución
@@ -184,7 +176,7 @@ def main():
     except psycopg2.OperationalError as e:
         print(f"Error de conexión: {e}")
     except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+        print(f"Ocurrió un error :(: {e}")
     finally:
         # 6. Cerrar conexiones
         if conn_oltp:
