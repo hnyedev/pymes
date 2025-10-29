@@ -11,7 +11,7 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - ./volume/oltp:/var/lib/postgresql/data
+      - ./ejecutables-sql/oltp:/docker-entrypoint-initdb.d
     restart: unless-stopped
 
   olap-db:
@@ -24,7 +24,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./volume/olap:/var/lib/postgresql/data
+      - ./ejecutables-sql/olap:/docker-entrypoint-initdb.d
     restart: unless-stopped
 
   metabase-db:
@@ -35,7 +35,7 @@ services:
       POSTGRES_USER: superu
       POSTGRES_PASSWORD: password_metabase
     volumes:
-      - ./volume/metabase:/var/lib/postgresql/data
+      - metabase-data:/var/lib/postgresql/data
     restart: unless-stopped
 
   metabase:
@@ -53,3 +53,6 @@ services:
     depends_on:
       - metabase-db
     restart: unless-stopped
+
+volumes:
+  metabase-data:
